@@ -84,7 +84,7 @@ def dedup_jaccard(indir, outdir, n=10, type="text", tau=0.5):
     
     norm_data = normalize_text if type == "text" else normalize_code
     
-    kept = []
+    kept_paths = []
     kept_shingles = []
     
     for path in sorted(indir.glob("*.txt"), key=lambda x: x.stat().st_size, reverse=True): # largest files first
@@ -96,11 +96,11 @@ def dedup_jaccard(indir, outdir, n=10, type="text", tau=0.5):
             print(f"Duplicate found: {path.name}")
             continue
         kept_shingles.append(sh)
-        kept.append(path)
+        kept_paths.append(path)
     
-    print(f"{len(kept)} unique files out of {len(list(indir.glob('*.txt')))} total files")
+    print(f"{len(kept_paths)} unique files out of {len(list(indir.glob('*.txt')))} total files")
     
-    for path in kept:
+    for path in kept_paths:
         (outdir / path.name).write_text(path.read_text())
 
 if __name__ == "__main__":
