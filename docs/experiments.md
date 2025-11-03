@@ -14,6 +14,8 @@ After that cleanup:
 
 All experiments below use subsets from these filtered datasets.
 
+**Baseline for agreement:** 1K/10K compare against exact Jaccard; 100K compares against plain LSH.
+
 ---
 
 ## **Small Scale — 1K Files (Exact Jaccard Baseline)**
@@ -45,14 +47,14 @@ Using 10,000 files from each dataset, we can observe how Jaccard and LSH behave 
 - Text: Jaccard 8,381 / 9,306 → LSH 8,387 / 9,306 (+6)
 - Code: Jaccard 8,662 / 10,000 → LSH 8,662 / 10,000 (same)
 
-So LSH runs about 10× faster with almost identical results.
+So LSH runs about 10× faster with almost identical results vs Jaccard baseline.
 
 ### Ablations
 
 To better understand how MinHash–LSH performance scales with its parameters, we vary the number of rows-per-band (r), while keeping the total number of hash functions \(k = 128\) fixed.
 
 ![Figure 1: LSH–MinHash Ablation vs. Rows per Band](images/lsh_ablations.png)
-**Figure 1.** Ablation on **rows-per-band** in LSH-MinHash. Blue (left): recall. Red (right): runtime (s).
+**Figure 1.** Ablation on **rows-per-band** in LSH-MinHash. Blue (left): agreement vs Jaccard (recall). Red (right): runtime (s).
 
 ---
 
@@ -90,10 +92,10 @@ To visualize the effect of SimHash filtering, this ablation compares different t
 
 ## **Summary**
 
-| Method          | Scale | Text Runtime (s) | Code Runtime (s) | Speed-up vs Jaccard | Recall | Notes                             |
-| :-------------- | :---: | ---------------: | ---------------: | :-----------------: | :----: | :-------------------------------- |
-| **Jaccard**     |  1K   |             12.7 |              3.7 |         1×          |  100%  | Exact pairwise comparison (O(N²)) |
-| **MinHash–LSH** |  10K  |            123.2 |             33.8 |       10–40×        | ≈100%  | Hash-based approximation          |
-| **SimHash–LSH** | 100K  |          1,452.9 |            447.9 |       80–100×       |  >98%  | SimHash prefilter + LSH           |
+| Method          | Scale | Text Runtime (s) | Code Runtime (s) | Speed-up vs Jaccard | Agreement vs Baseline | Notes                             |
+| :-------------- | :---: | ---------------: | ---------------: | :-----------------: | :-------------------: | :-------------------------------- |
+| **Jaccard**     |  1K   |             12.7 |              3.7 |         1×          |         100%          | Exact pairwise comparison (O(N²)) |
+| **MinHash–LSH** |  10K  |            123.2 |             33.8 |       10–40×        |         ≈100%         | Hash-based approximation          |
+| **SimHash–LSH** | 100K  |          1,452.9 |            447.9 |       80–100×       |         >98%          | SimHash prefilter + LSH           |
 
-Overall, deduplication scales smoothly from exact to approximate to hierarchical methods, maintaining high recall while reducing runtime from tens of hours to minutes.
+Overall, deduplication scales smoothly from exact to approximate to hierarchical methods, maintaining high correctness while reducing runtime from tens of hours to minutes.
