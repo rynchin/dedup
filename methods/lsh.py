@@ -105,7 +105,7 @@ class LSH:
 # Dedup 
 # ------------------------------------------------------------ #
 
-def dedup_lsh(indir, outdir, n=10, type="text", tau=0.5, k=128, r=4, seed=42):
+def dedup_lsh(indir, outdir, n=10, type="text", tau=0.5, k=128, r=4, seed=42, length=None):
     """
     LSH-MinHash dedup
      - Build MinHash signature for each file
@@ -121,6 +121,9 @@ def dedup_lsh(indir, outdir, n=10, type="text", tau=0.5, k=128, r=4, seed=42):
     lsh = LSH(k=k, r=r)
 
     files = sorted(indir.glob("*.txt"), key=lambda x: x.stat().st_size, reverse=True) # largest files first
+    if length:
+        files = files[:length]
+    
     kept_paths = []
     kept_shingles = []
     total_candidates = 0
@@ -150,7 +153,8 @@ def dedup_lsh(indir, outdir, n=10, type="text", tau=0.5, k=128, r=4, seed=42):
             kept_shingles.append(sh)
             kept_paths.append(path)
         else:
-            print(f"Duplicate found: {path.name}")
+            #print(f"Duplicate found: {path.name}")
+            continue
     
     print(f"{len(kept_paths)} unique files out of {len(files)} total files")
     print(f"Total candidates: {total_candidates}, Total pairs checked: {total_pairs}")
@@ -158,7 +162,14 @@ def dedup_lsh(indir, outdir, n=10, type="text", tau=0.5, k=128, r=4, seed=42):
     for path in kept_paths:
         (outdir / path.name).write_text(path.read_text())
     
+    return {
+        "unique_count": len(kept_paths),
+        "total_files": len(files),
+        "candidates": total_candidates,
+        "pairs_checked": total_pairs
+    }
+    
    
 if __name__ == "__main__":
-    dedup_lsh(indir="data/exact/wiki", outdir="data/lsh/wiki", n=4, type="text", tau=0.30, k=336, r=3)
-    dedup_lsh(indir="data/exact/code", outdir="data/lsh/code", n=5, type="code", tau=0.45, k=192, r=3)
+    dedup_lsh(indir="data/exact/wiki", outdir="data/lsh/wiki", n=4, type="text", tau=0.30, k=336, r=3, length = 1000)
+    dedup_lsh(indir="data/exact/code", outdir="data/lsh/code", n=5, type="code", tau=0.45, k=192, r=3, length = 1000)

@@ -1,47 +1,20 @@
-## Deduplication Summary
+# Deduplication at Scale
 
-**Datasets**
+Benchmarking scalable deduplication techniques across text and code datasets.
 
-- WikiText-2-Raw-v1
-- CodeSearchNet
+| Method      | Scale | Text Runtime (s) | Code Runtime (s) | Recall | Speed-up |
+| :---------- | :---: | ---------------: | ---------------: | :----: | :------: |
+| Jaccard     |  1K   |             12.7 |              3.7 |  100%  |    1×    |
+| MinHash–LSH |  10K  |            123.2 |             33.8 | ≈100%  |  10–40×  |
+| SimHash–LSH | 100K  |           1452.9 |            447.9 |  >98%  | 80–100×  |
 
----
+## Methods
 
-### Exact Matching
+- [exact.py](methods/exact.py) — exact duplicate removal via MD5 hashing
+- [jaccard.py](methods/jaccard.py) — Jaccard similarity deduplication
+- [lsh.py](methods/lsh.py) — MinHash-LSH deduplication
+- [simhash.py](methods/simhash.py) — hierarchical SimHash + LSH deduplication
 
-Before deduplication, exact string matches were removed.
+## Results
 
-After this step:
-
-- **WikiText-2 (1K):** 978 / 1000 files remained
-- **CodeSearchNet (1K):** 1000 / 1000 files remained
-- **WikiText-2 (10K):** 9,306 / 10,000 files remained
-- **CodeSearchNet (10K):** 10,000 / 10,000 files remained
-
----
-
-### 1K Files
-
-| Metric              | Text | Code |
-| :------------------ | :--: | :--: |
-| Jaccard Runtime (s) | 12.7 | 3.7  |
-| LSH Runtime (s)     | 8.8  | 1.8  |
-
-**Results:**
-
-- Text: Jaccard 930 / 978 vs LSH 930 / 978 (match)
-- Code: Jaccard 938 / 1000 vs LSH 938 / 1000 (match)
-
----
-
-### 10K Files
-
-| Metric              |  Text   | Code  |
-| :------------------ | :-----: | :---: |
-| Jaccard Runtime (s) | 1,229.9 | 313.1 |
-| LSH Runtime (s)     |  123.2  | 33.8  |
-
-**Results:**
-
-- Jaccard 8,381 / 9,306 vs LSH 8,387 / 9,306 (+6)
-- Jaccard 8,662 / 10,000 vs LSH 8,662 / 10,000 (match)
+See [complete breakdown](docs/experiments.md).

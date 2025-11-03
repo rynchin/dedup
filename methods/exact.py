@@ -6,7 +6,7 @@ def md5(path):
     """Return the md5 hash of the file"""
     return hashlib.md5(Path(path).read_bytes()).hexdigest()
 
-def exact_match(indir, outdir):
+def exact_match(indir, outdir, length=None):
     """
     Remove exact duplicates from input directory, saves in output directory
     """
@@ -16,7 +16,11 @@ def exact_match(indir, outdir):
     seen = set()
     kept = []
     
-    for path in indir.glob("*.txt"):
+    all_files = sorted(list(indir.glob("*.txt")))
+    if length:
+        all_files = all_files[:length]
+    
+    for path in all_files:
         md5_hash = md5(path)
         if md5_hash in seen:
             print(f"Duplicate found: {path.name}")
@@ -24,7 +28,7 @@ def exact_match(indir, outdir):
         seen.add(md5_hash)
         kept.append(path)
     
-    print(f"{len(kept)} unique files out of {len(list(indir.glob('*.txt')))} total files")
+    print(f"{len(kept)} unique files out of {len(all_files)} total files")
 
     for path in kept:
         (outdir / path.name).write_text(path.read_text())

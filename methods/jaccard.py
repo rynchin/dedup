@@ -73,7 +73,7 @@ def ngram_char_shingling(text, k=5):
         return set()
     return {text[i:i+k] for i in range(len(text)-k+1)}
 
-def dedup_jaccard(indir, outdir, n=10, type="text", tau=0.5):
+def dedup_jaccard(indir, outdir, n=10, type="text", tau=0.5, length=None):
     """
     Deduplicate files using Jaccard similarity
     """
@@ -87,7 +87,11 @@ def dedup_jaccard(indir, outdir, n=10, type="text", tau=0.5):
     kept_paths = []
     kept_shingles = []
     
-    for path in sorted(indir.glob("*.txt"), key=lambda x: x.stat().st_size, reverse=True): # largest files first
+    all_files = sorted(indir.glob("*.txt"), key=lambda x: x.stat().st_size, reverse=True)
+    if length:
+        all_files = all_files[:length]
+    
+    for path in all_files:
         text = path.read_text()
         text = norm_data(text)
         tokens = tokenize_text(text) if type == "text" else tokenize_code(text)
@@ -98,11 +102,13 @@ def dedup_jaccard(indir, outdir, n=10, type="text", tau=0.5):
         kept_shingles.append(sh)
         kept_paths.append(path)
     
-    print(f"{len(kept_paths)} unique files out of {len(list(indir.glob('*.txt')))} total files")
+    print(f"{len(kept_paths)} unique files out of {len(all_files)} total files")
     
     for path in kept_paths:
         (outdir / path.name).write_text(path.read_text())
+    
+    return {"unique_count": len(kept_paths), "total_files": len(all_files)}
 
 if __name__ == "__main__":
-    dedup_jaccard(indir="data/exact/wiki", outdir="data/jaccard/wiki", n=4, type="text", tau=0.30)
-    dedup_jaccard(indir="data/exact/code", outdir="data/jaccard/code", n=5, type="code", tau=0.45)
+    dedup_jaccard(indir="data/exact/wiki", outdir="data/jaccard/wiki", n=4, type="text", tau=0.30, length = 1000)
+    dedup_jaccard(indir="data/exact/code", outdir="data/jaccard/code", n=5, type="code", tau=0.45, length = 1000)

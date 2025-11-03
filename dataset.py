@@ -7,7 +7,7 @@ seed = 42
 random.seed(seed)
 
 def build_wiki(out_root="data", n=200):
-    ds = load_dataset("wikitext", "wikitext-2-raw-v1", split="train")
+    ds = load_dataset("Salesforce/wikitext", "wikitext-103-v1", split="train")
     wiki_samples = [x["text"] for x in random.sample([r for r in ds if len(r["text"].strip()) > 0], n)]
 
     file_path = Path(out_root) / "wiki"
@@ -27,5 +27,5 @@ def write_txts(items, outdir, prefix):
         (outdir / f"{prefix}_{i:05d}.txt").write_text(item)
     
 if __name__ == "__main__":
-    build_wiki(out_root="data/init", n=1000)
-    build_code(out_root="data/init", n=1000)
+    build_wiki(out_root="data/init", n=100000)
+    build_code(out_root="data/init", n=100000)
